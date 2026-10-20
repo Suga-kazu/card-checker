@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>カード配列検索・管理ツール</title>
-  <!-- Tailwind CSS (UIデザイン用) -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-12 font-sans">
@@ -13,9 +12,10 @@
   <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-10 shadow-lg">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <h1 class="text-lg font-bold text-indigo-400">🃏 カード配列チェッカー</h1>
-      <button onclick="toggleView()" id="toggleBtn" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg font-semibold transition">
-        ⚙️ 配列データ編集
-      </button>
+      <div class="flex gap-2">
+        <button onclick="switchTab('search')" id="tabSearch" class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-semibold transition">🔍 検索</button>
+        <button onclick="switchTab('manage')" id="tabManage" class="text-xs bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg font-semibold transition">⚙️ 管理・辞書</button>
+      </div>
     </div>
   </header>
 
@@ -25,22 +25,21 @@
     <section id="searchSection" class="space-y-4">
       <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow">
         <h2 class="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
-          🔍 出目（排出カード）を入力
+          🔍 番号の出目を入力
         </h2>
         
-        <!-- 3枚の入力スロット -->
         <div class="grid grid-cols-3 gap-2 mb-4">
           <div>
             <label class="block text-xs text-slate-400 mb-1">1枚目(古い)</label>
-            <input type="text" id="slot1" placeholder="例: N" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
+            <input type="text" id="slot1" placeholder="例: 1" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">2枚目</label>
-            <input type="text" id="slot2" placeholder="例: R" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
+            <input type="text" id="slot2" placeholder="例: 2" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">3枚目(直近)</label>
-            <input type="text" id="slot3" placeholder="例: SR" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
+            <input type="text" id="slot3" placeholder="例: 3" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
           </div>
         </div>
 
@@ -55,85 +54,120 @@
       </div>
 
       <!-- 検索結果表示エリア -->
-      <div id="resultsArea" class="space-y-3">
-        <!-- JSで動的に検索結果が差し込まれます -->
-      </div>
+      <div id="resultsArea" class="space-y-3"></div>
     </section>
 
     <!-- 2. データ管理モード画面 (初期状態は非表示) -->
-    <section id="manageSection" class="hidden space-y-4">
+    <section id="manageSection" class="hidden space-y-6">
+      
+      <!-- シリンダー配列の登録 -->
       <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow space-y-3">
-        <h2 class="text-sm font-bold text-indigo-400 flex items-center justify-between">
-          ➕ 新規配列パターンの登録
-        </h2>
+        <h2 class="text-sm font-bold text-indigo-400">➕ シリンダー配列（番号）の追加</h2>
         <div>
-          <label class="block text-xs text-slate-400 mb-1">グループ・シリンダー名</label>
-          <input type="text" id="newGroupTitle" placeholder="例: Aシリンダー (第1弾)" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
+          <label class="block text-xs text-slate-400 mb-1">シリンダー名</label>
+          <input type="text" id="newGroupTitle" placeholder="例: Aシリンダー" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs text-slate-400 mb-1">カード配列 sequence (カンマ区切り)</label>
-          <textarea id="newGroupCards" rows="3" placeholder="例: N, N, R, N, SR, N, R, UR, N" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm font-mono focus:outline-none"></textarea>
+          <label class="block text-xs text-slate-400 mb-1">カード番号の配列 (カンマ区切り)</label>
+          <textarea id="newGroupCards" rows="3" placeholder="例: 1, 2, 3, 4, 5, 6, 7" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm font-mono focus:outline-none"></textarea>
         </div>
         <button onclick="addPattern()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-sm transition">
-          追加保存
+          配列を追加保存
         </button>
       </div>
 
-      <!-- 登録済みパターン一覧 -->
+      <!-- カード名辞書の編集 -->
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow space-y-3">
+        <h2 class="text-sm font-bold text-amber-400">📖 カード名・レアリティ辞書</h2>
+        <p class="text-[11px] text-slate-400">番号に対する名前を後からいつでも紐づけられます。</p>
+        <div class="flex gap-2">
+          <input type="text" id="dictNo" placeholder="番号(例: 1)" class="w-1/3 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm text-center focus:outline-none">
+          <input type="text" id="dictName" placeholder="名前(例: SR悟空)" class="w-2/3 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
+        </div>
+        <button onclick="saveDictionaryItem()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg text-sm transition">
+          辞書に登録・更新
+        </button>
+        <div id="dictList" class="space-y-1 max-h-40 overflow-y-auto text-xs pt-2"></div>
+      </div>
+
+      <!-- 登録済みシリンダー一覧 -->
       <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow space-y-3">
         <div class="flex justify-between items-center">
-          <h2 class="text-sm font-bold text-slate-300">📚 登録済みデータ</h2>
+          <h2 class="text-sm font-bold text-slate-300">📚 登録済みシリンダー一覧</h2>
           <button onclick="resetToDefault()" class="text-xs text-rose-400 hover:underline">初期データに戻す</button>
         </div>
-        <div id="patternsList" class="space-y-2 text-xs">
-          <!-- JSで登録済みリストを表示 -->
-        </div>
+        <div id="patternsList" class="space-y-2 text-xs"></div>
       </div>
+
     </section>
 
   </main>
 
   <script>
-    // デフォルトのサンプルデータ
-    const DEFAULT_DATA = [
-      { id: "1", title: "シリンダーA (サンプル)", cards: ["N", "N", "R", "N", "SR", "N", "R", "N", "UR", "N", "R"] },
-      { id: "2", title: "シリンダーB (サンプル)", cards: ["N", "R", "N", "N", "UR", "R", "N", "SR", "N", "N", "SEC"] }
+    // デフォルトデータ（番号の配列）
+    const DEFAULT_PATTERNS = [
+      { id: "1", title: "シリンダーA", numbers: ["1", "2", "3", "4", "5", "6", "7", "8"] },
+      { id: "2", title: "シリンダーB", numbers: ["2", "4", "1", "5", "3", "8", "7", "6"] }
     ];
+    // デフォルト辞書（番号と名前の紐づけ）
+    const DEFAULT_DICT = {
+      "1": "N (ノーマル)",
+      "2": "N (ノーマル)",
+      "3": "R (レア)",
+      "4": "N (ノーマル)",
+      "5": "SR (スーパーレア)",
+      "6": "N (ノーマル)",
+      "7": "R (レア)",
+      "8": "UR (ウルトラレア)"
+    };
 
-    // LocalStorageからデータ取得
-    function getStoredData() {
-      const data = localStorage.getItem('card_patterns');
-      return data ? JSON.parse(data) : DEFAULT_DATA;
+    function getStoredPatterns() {
+      const data = localStorage.getItem('card_patterns_v2');
+      return data ? JSON.parse(data) : DEFAULT_PATTERNS;
+    }
+    function savePatterns(data) {
+      localStorage.setItem('card_patterns_v2', JSON.stringify(data));
+    }
+    function getStoredDict() {
+      const data = localStorage.getItem('card_dict_v2');
+      return data ? JSON.parse(data) : DEFAULT_DICT;
+    }
+    function saveDict(data) {
+      localStorage.setItem('card_dict_v2', JSON.stringify(data));
     }
 
-    // LocalStorageに保存
-    function saveData(data) {
-      localStorage.setItem('card_patterns', JSON.stringify(data));
-    }
-
-    // 画面切り替え（検索 ⇔ 管理）
-    function toggleView() {
+    // タブ切り替え
+    function switchTab(tab) {
       const searchSec = document.getElementById('searchSection');
       const manageSec = document.getElementById('manageSection');
-      const btn = document.getElementById('toggleBtn');
+      const tabSearch = document.getElementById('tabSearch');
+      const tabManage = document.getElementById('tabManage');
 
-      if (searchSec.classList.contains('hidden')) {
+      if (tab === 'search') {
         searchSec.classList.remove('hidden');
         manageSec.classList.add('hidden');
-        btn.innerText = "⚙️ 配列データ編集";
+        tabSearch.className = "text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-semibold transition";
+        tabManage.className = "text-xs bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg font-semibold transition";
       } else {
         searchSec.classList.add('hidden');
         manageSec.classList.remove('hidden');
-        btn.innerText = "🔍 検索画面に戻る";
-        renderManageList();
+        tabSearch.className = "text-xs bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg font-semibold transition";
+        tabManage.className = "text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-semibold transition";
+        renderManageScreen();
       }
     }
 
-    // 配列検索ロジック
+    // 番号からカード名を取得するヘルパー
+    function getCardName(no) {
+      const dict = getStoredDict();
+      return dict[no] ? `${no} (${dict[no]})` : `${no}`;
+    }
+
+    // 検索処理
     function searchSequence() {
-      const s1 = document.getElementById('slot1').value.trim().toUpperCase();
-      const s2 = document.getElementById('slot2').value.trim().toUpperCase();
-      const s3 = document.getElementById('slot3').value.trim().toUpperCase();
+      const s1 = document.getElementById('slot1').value.trim();
+      const s2 = document.getElementById('slot2').value.trim();
+      const s3 = document.getElementById('slot3').value.trim();
 
       const query = [s1, s2, s3].filter(x => x !== "");
       const resultsArea = document.getElementById('resultsArea');
@@ -144,54 +178,56 @@
         return;
       }
 
-      const patterns = getStoredData();
+      const patterns = getStoredPatterns();
       let matches = [];
 
       patterns.forEach(p => {
-        const cards = p.cards.map(c => c.toUpperCase());
-        for (let i = 0; i <= cards.length - query.length; i++) {
+        const nums = p.numbers.map(n => n.trim());
+        for (let i = 0; i <= nums.length - query.length; i++) {
           let isMatch = true;
           for (let j = 0; j < query.length; j++) {
-            if (cards[i + j] !== query[j]) {
+            if (nums[i + j] !== query[j]) {
               isMatch = false;
               break;
             }
           }
           if (isMatch) {
-            const nextCards = cards.slice(i + query.length, i + query.length + 3);
+            const nextNums = nums.slice(i + query.length, i + query.length + 3);
             matches.push({
               title: p.title,
               index: i + 1,
-              matchedSeq: cards.slice(i, i + query.length),
-              nextCards: nextCards
+              matchedSeq: nums.slice(i, i + query.length),
+              nextNums: nextNums
             });
           }
         }
       });
 
       if (matches.length === 0) {
-        resultsArea.innerHTML = `<div class="p-4 bg-slate-800/80 border border-slate-700 rounded-xl text-center text-xs text-slate-400">一致する配列パターンが見つかりませんでした。</div>`;
+        resultsArea.innerHTML = `<div class="p-4 bg-slate-800 border border-slate-700 rounded-xl text-center text-xs text-slate-400">一致する配列パターンが見つかりませんでした。</div>`;
         return;
       }
 
       matches.forEach(m => {
-        const nextStr = m.nextCards.length > 0 ? m.nextCards.join(" → ") : "（これ以降のデータなし）";
-        const cardHtml = `
-          <div class="bg-slate-800 p-4 rounded-xl border border-indigo-500/30 shadow">
-            <div class="flex justify-between items-start mb-2">
-              <span class="text-xs font-bold text-indigo-300 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-800">${m.title}</span>
+        const matchedNames = m.matchedSeq.map(n => getCardName(n)).join(" → ");
+        const nextNames = m.nextNums.length > 0 ? m.nextNums.map(n => getCardName(n)).join(" → ") : "（データなし）";
+
+        const html = `
+          <div class="bg-slate-800 p-4 rounded-xl border border-indigo-500/30 shadow space-y-2">
+            <div class="flex justify-between items-start">
+              <span class="text-xs font-bold text-indigo-300 bg-indigo-950 px-2 py-0.5 rounded border border-indigo-800">${m.title}</span>
               <span class="text-xs text-slate-400">位置: ${m.index}枚目付近</span>
             </div>
-            <div class="text-xs text-slate-300 mb-2">
-              一致箇所: <span class="font-mono text-amber-300 font-bold">${m.matchedSeq.join(" → ")}</span>
+            <div class="text-xs text-slate-300">
+              一致: <span class="font-mono text-amber-300 font-bold">${matchedNames}</span>
             </div>
-            <div class="mt-3 pt-2 border-t border-slate-700/60 flex items-center justify-between">
+            <div class="pt-2 border-t border-slate-700 flex items-center justify-between">
               <span class="text-xs font-semibold text-emerald-400">🔮 次の排出予測:</span>
-              <span class="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/50 px-2 py-1 rounded">${nextStr}</span>
+              <span class="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/50 px-2 py-1 rounded">${nextNames}</span>
             </div>
           </div>
         `;
-        resultsArea.insertAdjacentHTML('beforeend', cardHtml);
+        resultsArea.insertAdjacentHTML('beforeend', html);
       });
     }
 
@@ -202,66 +238,105 @@
       document.getElementById('resultsArea').innerHTML = "";
     }
 
-    // パターン追加
+    // シリンダー追加
     function addPattern() {
       const title = document.getElementById('newGroupTitle').value.trim();
       const cardsStr = document.getElementById('newGroupCards').value.trim();
 
       if (!title || !cardsStr) {
-        alert("タイトルと配列の両方を入力してください");
+        alert("タイトルと番号の配列を入力してください");
         return;
       }
 
-      const cards = cardsStr.split(/[,,\s]+/).map(c => c.trim()).filter(c => c !== "");
-      const patterns = getStoredData();
+      const numbers = cardsStr.split(/[,,\s]+/).map(c => c.trim()).filter(c => c !== "");
+      const patterns = getStoredPatterns();
       
-      patterns.push({
-        id: Date.now().toString(),
-        title: title,
-        cards: cards
-      });
-
-      saveData(patterns);
+      patterns.push({ id: Date.now().toString(), title, numbers });
+      savePatterns(patterns);
+      
       document.getElementById('newGroupTitle').value = "";
       document.getElementById('newGroupCards').value = "";
-      renderManageList();
-      alert("配列データを保存しました！");
+      renderManageScreen();
+      alert("シリンダー配列を追加しました！");
     }
 
-    // パターン削除
     function deletePattern(id) {
-      if (!confirm("この配列データを削除しますか？")) return;
-      let patterns = getStoredData();
+      if (!confirm("このシリンダーを削除しますか？")) return;
+      let patterns = getStoredPatterns();
       patterns = patterns.filter(p => p.id !== id);
-      saveData(patterns);
-      renderManageList();
+      savePatterns(patterns);
+      renderManageScreen();
     }
 
-    // 管理リスト描画
-    function renderManageList() {
-      const listEl = document.getElementById('patternsList');
-      const patterns = getStoredData();
-      listEl.innerHTML = "";
+    // 辞書アイテム保存
+    function saveDictionaryItem() {
+      const no = document.getElementById('dictNo').value.trim();
+      const name = document.getElementById('dictName').value.trim();
 
+      if (!no || !name) {
+        alert("番号と名前の両方を入力してください");
+        return;
+      }
+
+      const dict = getStoredDict();
+      dict[no] = name;
+      saveDict(dict);
+
+      document.getElementById('dictNo').value = "";
+      document.getElementById('dictName').value = "";
+      renderManageScreen();
+    }
+
+    function deleteDictItem(no) {
+      let dict = getStoredDict();
+      delete dict[no];
+      saveDict(dict);
+      renderManageScreen();
+    }
+
+    // 管理画面の描画更新
+    function renderManageScreen() {
+      // シリンダーリスト
+      const listEl = document.getElementById('patternsList');
+      const patterns = getStoredPatterns();
+      listEl.innerHTML = "";
       patterns.forEach(p => {
-        const item = `
+        listEl.insertAdjacentHTML('beforeend', `
           <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700 flex justify-between items-center">
             <div>
-              <div class="font-bold text-slate-200 text-xs">${p.title} (${p.cards.length}枚)</div>
-              <div class="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">${p.cards.join(", ")}</div>
+              <div class="font-bold text-slate-200 text-xs">${p.title} (${p.numbers.length}枚)</div>
+              <div class="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">${p.numbers.join(", ")}</div>
             </div>
-            <button onclick="deletePattern('${p.id}')" class="text-xs bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 px-2 py-1 rounded transition">削除</button>
+            <button onclick="deletePattern('${p.id}')" class="text-xs bg-rose-950 text-rose-300 border border-rose-800 px-2 py-1 rounded">削除</button>
           </div>
-        `;
-        listEl.insertAdjacentHTML('beforeend', item);
+        `);
       });
+
+      // 辞書リスト
+      const dictEl = document.getElementById('dictList');
+      const dict = getStoredDict();
+      dictEl.innerHTML = "";
+      const keys = Object.keys(dict).sort((a, b) => Number(a) - Number(b));
+      
+      if (keys.length === 0) {
+        dictEl.innerHTML = `<div class="text-slate-500 text-center">辞書データはまだありません</div>`;
+      } else {
+        keys.forEach(k => {
+          dictEl.insertAdjacentHTML('beforeend', `
+            <div class="bg-slate-900 px-2 py-1.5 rounded border border-slate-700 flex justify-between items-center">
+              <div><span class="font-mono text-amber-300 font-bold">No.${k}</span> : ${dict[k]}</div>
+              <button onclick="deleteDictItem('${k}')" class="text-[10px] text-rose-400 hover:underline">削除</button>
+            </div>
+          `);
+        });
+      }
     }
 
-    // 初期化
     function resetToDefault() {
-      if (confirm("初期サンプルデータに戻しますか？（追加したデータは消去されます）")) {
-        saveData(DEFAULT_DATA);
-        renderManageList();
+      if (confirm("初期データに戻しますか？")) {
+        savePatterns(DEFAULT_PATTERNS);
+        saveDict(DEFAULT_DICT);
+        renderManageScreen();
       }
     }
   </script>
