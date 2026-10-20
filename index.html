@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カード配列検索・管理ツール</title>
+  <!-- Tailwind CSS (UIデザイン用) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-12 font-sans">
+
+  <!-- ヘッダー -->
+  <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-10 shadow-lg">
+    <div class="max-w-md mx-auto flex justify-between items-center">
+      <h1 class="text-lg font-bold text-indigo-400">🃏 カード配列チェッカー</h1>
+      <button onclick="toggleView()" id="toggleBtn" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg font-semibold transition">
+        ⚙️ 配列データ編集
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto p-4 space-y-6">
+
+    <!-- 1. 検索モード画面 -->
+    <section id="searchSection" class="space-y-4">
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow">
+        <h2 class="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+          🔍 出目（排出カード）を入力
+        </h2>
+        
+        <!-- 3枚の入力スロット -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">1枚目(古い)</label>
+            <input type="text" id="slot1" placeholder="例: N" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">2枚目</label>
+            <input type="text" id="slot2" placeholder="例: R" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">3枚目(直近)</label>
+            <input type="text" id="slot3" placeholder="例: SR" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="searchSequence()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg shadow transition text-sm">
+            検索実行
+          </button>
+          <button onclick="clearSearch()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 rounded-lg text-sm transition">
+            クリア
+          </button>
+        </div>
+      </div>
+
+      <!-- 検索結果表示エリア -->
+      <div id="resultsArea" class="space-y-3">
+        <!-- JSで動的に検索結果が差し込まれます -->
+      </div>
+    </section>
+
+    <!-- 2. データ管理モード画面 (初期状態は非表示) -->
+    <section id="manageSection" class="hidden space-y-4">
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow space-y-3">
+        <h2 class="text-sm font-bold text-indigo-400 flex items-center justify-between">
+          ➕ 新規配列パターンの登録
+        </h2>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">グループ・シリンダー名</label>
+          <input type="text" id="newGroupTitle" placeholder="例: Aシリンダー (第1弾)" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">カード配列 sequence (カンマ区切り)</label>
+          <textarea id="newGroupCards" rows="3" placeholder="例: N, N, R, N, SR, N, R, UR, N" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm font-mono focus:outline-none"></textarea>
+        </div>
+        <button onclick="addPattern()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-sm transition">
+          追加保存
+        </button>
+      </div>
+
+      <!-- 登録済みパターン一覧 -->
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow space-y-3">
+        <div class="flex justify-between items-center">
+          <h2 class="text-sm font-bold text-slate-300">📚 登録済みデータ</h2>
+          <button onclick="resetToDefault()" class="text-xs text-rose-400 hover:underline">初期データに戻す</button>
+        </div>
+        <div id="patternsList" class="space-y-2 text-xs">
+          <!-- JSで登録済みリストを表示 -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // デフォルトのサンプルデータ
+    const DEFAULT_DATA = [
+      { id: "1", title: "シリンダーA (サンプル)", cards: ["N", "N", "R", "N", "SR", "N", "R", "N", "UR", "N", "R"] },
+      { id: "2", title: "シリンダーB (サンプル)", cards: ["N", "R", "N", "N", "UR", "R", "N", "SR", "N", "N", "SEC"] }
+    ];
+
+    // LocalStorageからデータ取得
+    function getStoredData() {
+      const data = localStorage.getItem('card_patterns');
+      return data ? JSON.parse(data) : DEFAULT_DATA;
+    }
+
+    // LocalStorageに保存
+    function saveData(data) {
+      localStorage.setItem('card_patterns', JSON.stringify(data));
+    }
+
+    // 画面切り替え（検索 ⇔ 管理）
+    function toggleView() {
+      const searchSec = document.getElementById('searchSection');
+      const manageSec = document.getElementById('manageSection');
+      const btn = document.getElementById('toggleBtn');
+
+      if (searchSec.classList.contains('hidden')) {
+        searchSec.classList.remove('hidden');
+        manageSec.classList.add('hidden');
+        btn.innerText = "⚙️ 配列データ編集";
+      } else {
+        searchSec.classList.add('hidden');
+        manageSec.classList.remove('hidden');
+        btn.innerText = "🔍 検索画面に戻る";
+        renderManageList();
+      }
+    }
+
+    // 配列検索ロジック
+    function searchSequence() {
+      const s1 = document.getElementById('slot1').value.trim().toUpperCase();
+      const s2 = document.getElementById('slot2').value.trim().toUpperCase();
+      const s3 = document.getElementById('slot3').value.trim().toUpperCase();
+
+      const query = [s1, s2, s3].filter(x => x !== "");
+      const resultsArea = document.getElementById('resultsArea');
+      resultsArea.innerHTML = "";
+
+      if (query.length === 0) {
+        resultsArea.innerHTML = `<div class="p-3 bg-slate-800 rounded-lg text-slate-400 text-xs text-center">出目を少なくとも1つ入力してください</div>`;
+        return;
+      }
+
+      const patterns = getStoredData();
+      let matches = [];
+
+      patterns.forEach(p => {
+        const cards = p.cards.map(c => c.toUpperCase());
+        for (let i = 0; i <= cards.length - query.length; i++) {
+          let isMatch = true;
+          for (let j = 0; j < query.length; j++) {
+            if (cards[i + j] !== query[j]) {
+              isMatch = false;
+              break;
+            }
+          }
+          if (isMatch) {
+            const nextCards = cards.slice(i + query.length, i + query.length + 3);
+            matches.push({
+              title: p.title,
+              index: i + 1,
+              matchedSeq: cards.slice(i, i + query.length),
+              nextCards: nextCards
+            });
+          }
+        }
+      });
+
+      if (matches.length === 0) {
+        resultsArea.innerHTML = `<div class="p-4 bg-slate-800/80 border border-slate-700 rounded-xl text-center text-xs text-slate-400">一致する配列パターンが見つかりませんでした。</div>`;
+        return;
+      }
+
+      matches.forEach(m => {
+        const nextStr = m.nextCards.length > 0 ? m.nextCards.join(" → ") : "（これ以降のデータなし）";
+        const cardHtml = `
+          <div class="bg-slate-800 p-4 rounded-xl border border-indigo-500/30 shadow">
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-xs font-bold text-indigo-300 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-800">${m.title}</span>
+              <span class="text-xs text-slate-400">位置: ${m.index}枚目付近</span>
+            </div>
+            <div class="text-xs text-slate-300 mb-2">
+              一致箇所: <span class="font-mono text-amber-300 font-bold">${m.matchedSeq.join(" → ")}</span>
+            </div>
+            <div class="mt-3 pt-2 border-t border-slate-700/60 flex items-center justify-between">
+              <span class="text-xs font-semibold text-emerald-400">🔮 次の排出予測:</span>
+              <span class="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/50 px-2 py-1 rounded">${nextStr}</span>
+            </div>
+          </div>
+        `;
+        resultsArea.insertAdjacentHTML('beforeend', cardHtml);
+      });
+    }
+
+    function clearSearch() {
+      document.getElementById('slot1').value = "";
+      document.getElementById('slot2').value = "";
+      document.getElementById('slot3').value = "";
+      document.getElementById('resultsArea').innerHTML = "";
+    }
+
+    // パターン追加
+    function addPattern() {
+      const title = document.getElementById('newGroupTitle').value.trim();
+      const cardsStr = document.getElementById('newGroupCards').value.trim();
+
+      if (!title || !cardsStr) {
+        alert("タイトルと配列の両方を入力してください");
+        return;
+      }
+
+      const cards = cardsStr.split(/[,,\s]+/).map(c => c.trim()).filter(c => c !== "");
+      const patterns = getStoredData();
+      
+      patterns.push({
+        id: Date.now().toString(),
+        title: title,
+        cards: cards
+      });
+
+      saveData(patterns);
+      document.getElementById('newGroupTitle').value = "";
+      document.getElementById('newGroupCards').value = "";
+      renderManageList();
+      alert("配列データを保存しました！");
+    }
+
+    // パターン削除
+    function deletePattern(id) {
+      if (!confirm("この配列データを削除しますか？")) return;
+      let patterns = getStoredData();
+      patterns = patterns.filter(p => p.id !== id);
+      saveData(patterns);
+      renderManageList();
+    }
+
+    // 管理リスト描画
+    function renderManageList() {
+      const listEl = document.getElementById('patternsList');
+      const patterns = getStoredData();
+      listEl.innerHTML = "";
+
+      patterns.forEach(p => {
+        const item = `
+          <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700 flex justify-between items-center">
+            <div>
+              <div class="font-bold text-slate-200 text-xs">${p.title} (${p.cards.length}枚)</div>
+              <div class="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">${p.cards.join(", ")}</div>
+            </div>
+            <button onclick="deletePattern('${p.id}')" class="text-xs bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 px-2 py-1 rounded transition">削除</button>
+          </div>
+        `;
+        listEl.insertAdjacentHTML('beforeend', item);
+      });
+    }
+
+    // 初期化
+    function resetToDefault() {
+      if (confirm("初期サンプルデータに戻しますか？（追加したデータは消去されます）")) {
+        saveData(DEFAULT_DATA);
+        renderManageList();
+      }
+    }
+  </script>
+</body>
+</html>
