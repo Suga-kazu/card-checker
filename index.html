@@ -191,12 +191,14 @@
       // 番号(no) の頭文字を判定に使用します（大文字に揃えて判定）
       const upperNo = no.toUpperCase();
 
-      if (upperNo.startsWith("UR") || upperNo.startsWith("SEC")) {
-        badgeColor = "bg-amber-950/80 text-amber-300 border-amber-600 font-bold"; // 金色系
-      } else if (upperNo.startsWith("SR")) {
-        badgeColor = "bg-rose-950/80 text-rose-300 border-rose-600 font-bold"; // 赤色系
+      if (upperNo.startsWith("PL")) {
+        badgeColor = "bg-pink-950/80 text-pink-300 border-pink-600 font-bold"; // ピンク系
+      } else if (upperNo.startsWith("PR")) {
+        badgeColor = "bg-yellow-950/80 text-yellow-300 border-yellow-600 font-bold"; // 黄色系
       } else if (upperNo.startsWith("R")) {
-        badgeColor = "bg-blue-950/80 text-blue-300 border-blue-600"; // 青色系
+        badgeColor = "bg-gray-950/80 text-gray-300 border-gray-600"; // 青色系
+      } else if (upperNo.startsWith("N")) {
+        badgeColor = "bg-slate-950/80 text-slate-300 border-slate-600"; // 青色系
       }
 
       return `
