@@ -60,9 +60,10 @@
     <!-- 2. データ管理モード画面 (初期状態は非表示) -->
     <section id="manageSection" class="hidden space-y-6">
       
-      <!-- シリンダー配列の登録 -->
+      <!-- シリンダー配列の登録・編集フォーム -->
       <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow space-y-3">
-        <h2 class="text-sm font-bold text-indigo-400">➕ シリンダー配列（番号）の追加</h2>
+        <h2 id="formTitle" class="text-sm font-bold text-indigo-400">➕ シリンダー配列（番号）の追加</h2>
+        <input type="hidden" id="editTargetId" value="">
         <div>
           <label class="block text-xs text-slate-400 mb-1">シリンダー名</label>
           <input type="text" id="newGroupTitle" placeholder="例: Aシリンダー" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
@@ -71,9 +72,14 @@
           <label class="block text-xs text-slate-400 mb-1">カード番号の配列 (カンマ区切り)</label>
           <textarea id="newGroupCards" rows="3" placeholder="例: 1, 2, 3, 4, 5, 6, 7" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm font-mono focus:outline-none"></textarea>
         </div>
-        <button onclick="addPattern()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-sm transition">
-          配列を追加保存
-        </button>
+        <div class="flex gap-2">
+          <button id="saveButton" onclick="savePattern()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-sm transition">
+            配列を追加保存
+          </button>
+          <button id="cancelButton" onclick="resetForm()" class="hidden bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 rounded-lg text-sm transition">
+            キャンセル
+          </button>
+        </div>
       </div>
 
       <!-- カード名辞書の編集 -->
@@ -82,7 +88,7 @@
         <p class="text-[11px] text-slate-400">番号に対する名前を後からいつでも紐づけられます。</p>
         <div class="flex gap-2">
           <input type="text" id="dictNo" placeholder="番号(例: 1)" class="w-1/3 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm text-center focus:outline-none">
-          <input type="text" id="dictName" placeholder="名前(例: SR悟空)" class="w-2/3 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
+          <input type="text" id="dictName" placeholder="名前(例: N01, R02)" class="w-2/3 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
         </div>
         <button onclick="saveDictionaryItem()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg text-sm transition">
           辞書に登録・更新
@@ -109,8 +115,8 @@
       { id: "2", title: "シリンダーB", numbers: ["2", "4", "1", "5", "3", "8", "7", "6"] }
     ];
     const DEFAULT_DICT = {
-      "1": "N", "2": "N", "3": "R", "4": "N", 
-      "5": "SR", "6": "N", "7": "R", "8": "UR"
+      "1": "N01", "2": "N02", "3": "R01", "4": "N03", 
+      "5": "SR01", "6": "N04", "7": "R02", "8": "UR01"
     };
 
     function getStoredPatterns() {
@@ -148,10 +154,28 @@
       }
     }
 
+    // レアリティの頭文字に合わせて色を変える機能（昨日の話題を反映！）
     function getCardDisplay(no) {
       const dict = getStoredDict();
-      const name = dict[no];
-      return name ? `<span class="font-bold">${no}</span><span class="text-[10px] opacity-75 block">${name}</span>` : `<span class="font-bold">${no}</span>`;
+      const name = dict[no] || "";
+      
+      let badgeColor = "bg-slate-800 text-slate-300 border-slate-700";
+      const upperName = name.toUpperCase();
+      
+      if (upperName.startsWith("UR") || upperName.startsWith("SEC")) {
+        badgeColor = "bg-amber-950/80 text-amber-300 border-amber-600 font-bold";
+      } else if (upperName.startsWith("SR")) {
+        badgeColor = "bg-rose-950/80 text-rose-300 border-rose-600 font-bold";
+      } else if (upperName.startsWith("R")) {
+        badgeColor = "bg-blue-950/80 text-blue-300 border-blue-600";
+      }
+
+      return `
+        <div class="px-2 py-1 rounded border ${badgeColor} text-center min-w-[55px]">
+          <span class="text-[9px] block opacity-75 font-mono">No.${no}</span>
+          <span class="text-xs">${name || no}</span>
+        </div>
+      `;
     }
 
     function searchSequence() {
@@ -182,7 +206,6 @@
             }
           }
           if (isMatch) {
-            // 一致した位置の次から最後まで全部取得
             const nextNums = nums.slice(i + query.length);
             matches.push({
               title: p.title,
@@ -202,15 +225,13 @@
       matches.forEach(m => {
         const matchedNames = m.matchedSeq.map(n => getCardDisplay(n)).join(' <span class="text-slate-500">→</span> ');
         
-        // 残りのカードを横スクロールで並べるHTML
         let nextHtml = '<span class="text-slate-500 text-xs">（これ以降のデータなし）</span>';
         if (m.nextNums.length > 0) {
           nextHtml = `
-            <div class="flex gap-1.5 overflow-x-auto pb-2 pt-1 scrollbar-thin">
+            <div class="flex gap-1.5 overflow-x-auto pb-2 pt-1">
               ${m.nextNums.map((n, idx) => `
-                <div class="flex-shrink-0 bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-center min-w-[50px]">
-                  <span class="text-[10px] text-slate-400 block">+#${idx + 1}</span>
-                  <div class="text-xs text-emerald-300 font-mono">${getCardDisplay(n)}</div>
+                <div class="flex-shrink-0 bg-slate-900 border border-slate-700 rounded p-1 text-center">
+                  <span class="text-[9px] text-slate-400 block">+#${idx + 1}</span>${getCardDisplay(n)}
                 </div>
               `).join('')}
             </div>
@@ -225,7 +246,7 @@
             </div>
             <div class="text-xs text-slate-300 bg-slate-900/50 p-2 rounded border border-slate-700/50">
               <span class="text-[10px] text-slate-400 block mb-1">一致した出目:</span>
-              <div class="flex flex-wrap gap-2 items-center font-mono text-amber-300">${matchedNames}</div>
+              <div class="flex flex-wrap gap-2 items-center">${matchedNames}</div>
             </div>
             <div>
               <span class="text-xs font-semibold text-emerald-400 block mb-1">🔮 以降の排出予測（横スクロール）:</span>
@@ -244,25 +265,67 @@
       document.getElementById('resultsArea').innerHTML = "";
     }
 
-    function addPattern() {
+    // 登録・更新を兼ねた保存処理
+    function savePattern() {
+      const editId = document.getElementById('editTargetId').value;
       const title = document.getElementById('newGroupTitle').value.trim();
       const cardsStr = document.getElementById('newGroupCards').value.trim();
 
       if (!title || !cardsStr) {
-        alert("タイトルと番号の配列を入力してください");
+        alert("シリンダー名と番号の配列を入力してください");
         return;
       }
 
       const numbers = cardsStr.split(/[,,\s]+/).map(c => c.trim()).filter(c => c !== "");
       const patterns = getStoredPatterns();
-      
-      patterns.push({ id: Date.now().toString(), title, numbers });
+
+      if (editId) {
+        // 既存データの更新（編集モード）
+        const index = patterns.findIndex(p => p.id === editId);
+        if (index !== -1) {
+          patterns[index].title = title;
+          patterns[index].numbers = numbers;
+        }
+        alert("シリンダー配列を更新しました！");
+      } else {
+        // 新規追加
+        patterns.push({ id: Date.now().toString(), title, numbers });
+        alert("シリンダー配列を追加保存しました！");
+      }
+
       savePatterns(patterns);
+      resetForm();
+      renderManageScreen();
+    }
+
+    // 編集モードにする
+    function editPattern(id) {
+      const patterns = getStoredPatterns();
+      const target = patterns.find(p => p.id === id);
+      if (!target) return;
+
+      document.getElementById('editTargetId').value = target.id;
+      document.getElementById('newGroupTitle').value = target.title;
+      document.getElementById('newGroupCards').value = target.numbers.join(", ");
       
+      document.getElementById('formTitle').innerText = "✏️ シリンダー配列の編集";
+      document.getElementById('saveButton').innerText = "変更を保存する";
+      document.getElementById('saveButton').className = "flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg text-sm transition";
+      document.getElementById('cancelButton').classList.remove('hidden');
+
+      // 画面上部にスクロール
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // フォームをリセット
+    function resetForm() {
+      document.getElementById('editTargetId').value = "";
       document.getElementById('newGroupTitle').value = "";
       document.getElementById('newGroupCards').value = "";
-      renderManageScreen();
-      alert("シリンダー配列を追加しました！");
+      document.getElementById('formTitle').innerText = "➕ シリンダー配列（番号）の追加";
+      document.getElementById('saveButton').innerText = "配列を追加保存";
+      document.getElementById('saveButton').className = "flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-sm transition";
+      document.getElementById('cancelButton').classList.add('hidden');
     }
 
     function deletePattern(id) {
@@ -305,11 +368,14 @@
       patterns.forEach(p => {
         listEl.insertAdjacentHTML('beforeend', `
           <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700 flex justify-between items-center">
-            <div>
+            <div class="truncate mr-2">
               <div class="font-bold text-slate-200 text-xs">${p.title} (${p.numbers.length}枚)</div>
-              <div class="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">${p.numbers.join(", ")}</div>
+              <div class="text-[10px] text-slate-400 font-mono truncate max-w-[170px]">${p.numbers.join(", ")}</div>
             </div>
-            <button onclick="deletePattern('${p.id}')" class="text-xs bg-rose-950 text-rose-300 border border-rose-800 px-2 py-1 rounded">削除</button>
+            <div class="flex gap-1 flex-shrink-0">
+              <button onclick="editPattern('${p.id}')" class="text-xs bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-1 rounded">編集</button>
+              <button onclick="deletePattern('${p.id}')" class="text-xs bg-rose-950 text-rose-300 border border-rose-800 px-2 py-1 rounded">削除</button>
+            </div>
           </div>
         `);
       });
@@ -337,11 +403,10 @@
       if (confirm("初期データに戻しますか？")) {
         savePatterns(DEFAULT_PATTERNS);
         saveDict(DEFAULT_DICT);
+        resetForm();
         renderManageScreen();
       }
     }
   </script>
 </body>
 </html>
-
-
