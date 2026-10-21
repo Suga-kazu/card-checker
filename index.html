@@ -69,6 +69,15 @@
     <!-- 2. データ管理モード画面 (初期状態は非表示) -->
     <section id="manageSection" class="hidden space-y-6">
 
+      <!-- ★ここから貼り付け★ -->
+      <div class="bg-indigo-950 p-3 rounded-xl border border-indigo-700 space-y-2">
+        <span class="text-xs font-bold text-indigo-300 block">📦 現在のデータをJSONとして取り出す</span>
+        <button onclick="exportToJson()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 rounded text-xs">
+          スマホ内のデータをコピーする
+        </button>
+      </div>
+      <!-- ★ここまで貼り付け★ -->
+
       <!-- シリンダー配列の登録・編集フォーム -->
       <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow space-y-3">
         <h2 id="formTitle" class="text-sm font-bold text-indigo-400">➕ シリンダー配列（番号）の追加</h2>
@@ -193,12 +202,12 @@
 
       if (upperNo.startsWith("PL")) {
         badgeColor = "bg-pink-950/80 text-pink-300 border-pink-600 font-bold"; // ピンク系
+      } else if (upperNo.startsWith("ER")) {
+        badgeColor = "bg-blue-950/80 text-blue-300 border-blue-600 font-bold"; // 青色系
       } else if (upperNo.startsWith("PR")) {
         badgeColor = "bg-yellow-950/80 text-yellow-300 border-yellow-600 font-bold"; // 黄色系
       } else if (upperNo.startsWith("R")) {
-        badgeColor = "bg-gray-950/80 text-gray-300 border-gray-600"; // 青色系
-      } else if (upperNo.startsWith("N")) {
-        badgeColor = "bg-slate-950/80 text-slate-300 border-slate-600"; // 青色系
+        badgeColor = "bg-green-950/80 text-green-300 border-green-600"; // 緑色系
       }
 
       return `
@@ -437,6 +446,19 @@
         resetForm();
         renderManageScreen();
       }
+    }
+    // スマホのデータをコピーする機能
+    function exportToJson() {
+      const patterns = getStoredPatterns();
+      const dict = getStoredDict();
+      const exportData = { patterns: patterns, dict: dict };
+      const jsonStr = JSON.stringify(exportData, null, 2);
+      
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        alert("データをコピーしました！\nLINEやメール、メモ帳などに貼り付けてPCに送信してください。");
+      }).catch(() => {
+        prompt("以下のテキストをすべて全選択してコピーし、PCへ送ってください:", jsonStr);
+      });
     }
   </script>
 </body>
