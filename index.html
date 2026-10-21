@@ -159,17 +159,28 @@
       const dict = getStoredDict();
       const name = dict[no] || "";
       
-      let badgeColor = "bg-slate-800 text-slate-300 border-slate-700";
+      let badgeColor = "bg-slate-100 text-black border-slate-300";
       const upperName = name.toUpperCase();
-      
-      if (upperName.startsWith("UR") || upperName.startsWith("SEC")) {
-        badgeColor = "bg-amber-950/80 text-amber-300 border-amber-600 font-bold";
-      } else if (upperName.startsWith("SR")) {
-        badgeColor = "bg-rose-950/80 text-rose-300 border-rose-600 font-bold";
-      } else if (upperName.startsWith("R")) {
-        badgeColor = "bg-blue-950/80 text-blue-300 border-blue-600";
-      }
 
+// PL（ピンク）
+if (upperName.startsWith("PL")) {
+  badgeColor = "bg-pink-950/80 text-pink-300 border-pink-600 font-bold";
+}
+
+// PR（黄色）
+else if (upperName.startsWith("PR")) {
+  badgeColor = "bg-yellow-950/80 text-yellow-300 border-yellow-600 font-bold";
+}
+
+// R（グレー）
+else if (upperName.startsWith("R")) {
+  badgeColor = "bg-slate-700 text-slate-200 border-slate-500";
+}
+
+// N（白）
+else if (upperName.startsWith("N")) {
+  badgeColor = "bg-slate-100 text-black border-slate-300";
+}
       return `
         <div class="px-2 py-1 rounded border ${badgeColor} text-center min-w-[55px]">
           <span class="text-[9px] block opacity-75 font-mono">No.${no}</span>
