@@ -110,40 +110,26 @@
   </main>
 
   <script>
-<!-- 管理画面に追加する一時ボタン -->
-<div class="bg-indigo-950 p-3 rounded-xl border border-indigo-700 space-y-2">
-  <span class="text-xs font-bold text-indigo-300 block">📦 現在のデータをJSONとして取り出す</span>
-  <button onclick="exportToJson()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 rounded text-xs">
-    データをコピーする
-  </button>
-</div>
-    const DEFAULT_PATTERNS = [
-      { id: "1", title: "シリンダーA", numbers: ["1", "2", "3", "4", "5", "6", "7", "8"] },
-      { id: "2", title: "シリンダーB", numbers: ["2", "4", "1", "5", "3", "8", "7", "6"] }
-    ];
-    const DEFAULT_DICT = {
-      "1": "N01", "2": "N02", "3": "R01", "4": "N03", 
-      "5": "SR01", "6": "N04", "7": "R02", "8": "UR01"
-    };
-function exportToJson() {
-  const patterns = getStoredPatterns();
-  const dict = getStoredDict();
+
+    function exportToJson() {
+      const patterns = getStoredPatterns();
+      const dict = getStoredDict();
   
-  const exportData = {
-    patterns: patterns,
-    dict: dict
-  };
+      const exportData = {
+        patterns: patterns,
+        dict: dict
+      };
   
-  const jsonStr = JSON.stringify(exportData, null, 2);
+      const jsonStr = JSON.stringify(exportData, null, 2);
   
-  // クリップボードにコピー
-  navigator.clipboard.writeText(jsonStr).then(() => {
-    alert("スマホ内のデータをコピーしました！\nLINEやメール、メモ帳などに貼り付けてPCに送信してください。");
-  }).catch(() => {
-    // コピーに失敗した場合のバックアップ（ダイアログ表示）
-    prompt("以下のテキストをすべてコピーしてPCに送ってください:", jsonStr);
-  });
-}
+      // クリップボードにコピー
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        alert("スマホ内のデータをコピーしました！\nLINEやメール、メモ帳などに貼り付けてPCに送信してください。");
+      }).catch(() => {
+        // コピーに失敗した場合のバックアップ（ダイアログ表示）
+        prompt("以下のテキストをすべてコピーしてPCに送ってください:", jsonStr);
+      });
+    }
 
     function getStoredPatterns() {
       const data = localStorage.getItem('card_patterns_v2');
@@ -188,25 +174,26 @@ function exportToJson() {
       let badgeColor = "bg-slate-100 text-black border-slate-300";
       const upperName = name.toUpperCase();
 
-// PL（ピンク）
-if (upperName.startsWith("PL")) {
-  badgeColor = "bg-pink-950/80 text-pink-300 border-pink-600 font-bold";
-}
+      // PL（ピンク）
+      if (upperName.startsWith("PL")) {
+        badgeColor = "bg-pink-950/80 text-pink-300 border-pink-600 font-bold";
+      }
 
-// PR（黄色）
-else if (upperName.startsWith("PR")) {
-  badgeColor = "bg-yellow-950/80 text-yellow-300 border-yellow-600 font-bold";
-}
+      // PR（黄色）
+      else if (upperName.startsWith("PR")) {
+        badgeColor = "bg-yellow-950/80 text-yellow-300 border-yellow-600 font-bold";
+      }
 
-// R（グレー）
-else if (upperName.startsWith("R")) {
-  badgeColor = "bg-slate-700 text-slate-200 border-slate-500";
-}
+      // R（グレー）
+      else if (upperName.startsWith("R")) {
+        badgeColor = "bg-slate-700 text-slate-200 border-slate-500";
+      }
 
-// N（白）
-else if (upperName.startsWith("N")) {
-  badgeColor = "bg-slate-100 text-black border-slate-300";
-}
+      // N（白）
+      else if (upperName.startsWith("N")) {
+        badgeColor = "bg-slate-100 text-black border-slate-300";
+      }
+
       return `
         <div class="px-2 py-1 rounded border ${badgeColor} text-center min-w-[55px]">
           <span class="text-[9px] block opacity-75 font-mono">No.${no}</span>
