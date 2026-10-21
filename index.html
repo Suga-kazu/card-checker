@@ -69,14 +69,13 @@
     <!-- 2. データ管理モード画面 (初期状態は非表示) -->
     <section id="manageSection" class="hidden space-y-6">
 
-      <!-- ★ここから貼り付け★ -->
+      <!-- データ書き出しエリア -->
       <div class="bg-indigo-950 p-3 rounded-xl border border-indigo-700 space-y-2">
         <span class="text-xs font-bold text-indigo-300 block">📦 現在のデータをJSONとして取り出す</span>
         <button onclick="exportToJson()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 rounded text-xs">
           スマホ内のデータをコピーする
         </button>
       </div>
-      <!-- ★ここまで貼り付け★ -->
 
       <!-- シリンダー配列の登録・編集フォーム -->
       <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow space-y-3">
@@ -135,26 +134,23 @@
   </main>
 
   <script>
+    // 初期データの定義（これが無かったためエラーになっていました）
+    const DEFAULT_PATTERNS = [
+      {
+        id: "1",
+        title: "サンプルシリンダーA",
+        numbers: ["1", "2", "3", "R01", "4", "5", "SR01", "6", "7", "UR01"]
+      }
+    ];
 
-    function exportToJson() {
-      const patterns = getStoredPatterns();
-      const dict = getStoredDict();
-
-      const exportData = {
-        patterns: patterns,
-        dict: dict
-      };
-
-      const jsonStr = JSON.stringify(exportData, null, 2);
-
-      // クリップボードにコピー
-      navigator.clipboard.writeText(jsonStr).then(() => {
-        alert("スマホ内のデータをコピーしました！\nLINEやメール、メモ帳などに貼り付けてPCに送信してください。");
-      }).catch(() => {
-        // コピーに失敗した場合のバックアップ（ダイアログ表示）
-        prompt("以下のテキストをすべてコピーしてPCに送ってください:", jsonStr);
-      });
-    }
+    const DEFAULT_DICT = {
+      "1": "N01",
+      "2": "N02",
+      "3": "N03",
+      "R01": "R01",
+      "SR01": "SR01",
+      "UR01": "UR01"
+    };
 
     function getStoredPatterns() {
       const data = localStorage.getItem('card_patterns_v2');
@@ -191,31 +187,30 @@
       }
     }
 
-    // レアリティの頭文字に合わせて色を変える機能（昨日の話題を反映！）
+    // レアリティの頭文字に合わせて色を変える機能
     function getCardDisplay(no) {
       const dict = getStoredDict();
       const name = dict[no] || "";
 
       let badgeColor = "bg-slate-800 text-slate-300 border-slate-700";
-      // 番号(no) の頭文字を判定に使用します（大文字に揃えて判定）
       const upperNo = no.toUpperCase();
 
-      if (upperNo.startsWith("PL")) {
-        badgeColor = "bg-pink-950/80 text-pink-300 border-pink-600 font-bold"; // ピンク系
-      } else if (upperNo.startsWith("ER")) {
-        badgeColor = "bg-blue-950/80 text-blue-300 border-blue-600 font-bold"; // 青色系
-      } else if (upperNo.startsWith("PR")) {
-        badgeColor = "bg-yellow-950/80 text-yellow-300 border-yellow-600 font-bold"; // 黄色系
+      if (upperNo.startsWith("UR") || upperNo.startsWith("SEC")) {
+        badgeColor = "bg-amber-950/80 text-amber-300 border-amber-600 font-bold"; // 金色系
+      } else if (upperNo.startsWith("SR")) {
+        badgeColor = "bg-rose-950/80 text-rose-300 border-rose-600 font-bold"; // 赤色系
       } else if (upperNo.startsWith("R")) {
-        badgeColor = "bg-green-950/80 text-green-300 border-green-600"; // 緑色系
+        badgeColor = "bg-blue-950/80 text-blue-300 border-blue-600"; // 青色系
+      } else if (upperNo.startsWith("PL")) {
+        badgeColor = "bg-pink-950/80 text-pink-300 border-pink-600 font-bold";
       }
 
       return `
-    <div class="px-2 py-1 rounded border ${badgeColor} text-center min-w-[55px]">
-      <span class="text-[9px] block opacity-75 font-mono">No.${no}</span>
-      <span class="text-xs">${name || no}</span>
-    </div>
-  `;
+        <div class="px-2 py-1 rounded border ${badgeColor} text-center min-w-[55px]">
+          <span class="text-[9px] block opacity-75 font-mono">No.${no}</span>
+          <span class="text-xs">${name || no}</span>
+        </div>
+      `;
     }
 
     function searchSequence() {
@@ -320,7 +315,6 @@
       const patterns = getStoredPatterns();
 
       if (editId) {
-        // 既存データの更新（編集モード）
         const index = patterns.findIndex(p => p.id === editId);
         if (index !== -1) {
           patterns[index].title = title;
@@ -328,7 +322,6 @@
         }
         alert("シリンダー配列を更新しました！");
       } else {
-        // 新規追加
         patterns.push({ id: Date.now().toString(), title, numbers });
         alert("シリンダー配列を追加保存しました！");
       }
@@ -338,7 +331,6 @@
       renderManageScreen();
     }
 
-    // 編集モードにする
     function editPattern(id) {
       const patterns = getStoredPatterns();
       const target = patterns.find(p => p.id === id);
@@ -353,11 +345,9 @@
       document.getElementById('saveButton').className = "flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg text-sm transition";
       document.getElementById('cancelButton').classList.remove('hidden');
 
-      // 画面上部にスクロール
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // フォームをリセット
     function resetForm() {
       document.getElementById('editTargetId').value = "";
       document.getElementById('newGroupTitle').value = "";
@@ -447,6 +437,7 @@
         renderManageScreen();
       }
     }
+
     // スマホのデータをコピーする機能
     function exportToJson() {
       const patterns = getStoredPatterns();
