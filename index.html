@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>カード配列検索・管理ツール</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-12 font-sans">
 
   <!-- ヘッダー -->
@@ -13,8 +15,10 @@
     <div class="max-w-md mx-auto flex justify-between items-center">
       <h1 class="text-lg font-bold text-indigo-400">🃏 カード配列チェッカー</h1>
       <div class="flex gap-2">
-        <button onclick="switchTab('search')" id="tabSearch" class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-semibold transition">🔍 検索</button>
-        <button onclick="switchTab('manage')" id="tabManage" class="text-xs bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg font-semibold transition">⚙️ 管理・辞書</button>
+        <button onclick="switchTab('search')" id="tabSearch"
+          class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-semibold transition">🔍 検索</button>
+        <button onclick="switchTab('manage')" id="tabManage"
+          class="text-xs bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg font-semibold transition">⚙️ 管理・辞書</button>
       </div>
     </div>
   </header>
@@ -27,27 +31,32 @@
         <h2 class="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
           🔍 番号の出目を入力
         </h2>
-        
+
         <div class="grid grid-cols-3 gap-2 mb-4">
           <div>
             <label class="block text-xs text-slate-400 mb-1">1枚目(古い)</label>
-            <input type="text" id="slot1" placeholder="例: 1" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
+            <input type="text" id="slot1" placeholder="例: 1"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">2枚目</label>
-            <input type="text" id="slot2" placeholder="例: 2" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
+            <input type="text" id="slot2" placeholder="例: 2"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">3枚目(直近)</label>
-            <input type="text" id="slot3" placeholder="例: 3" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
+            <input type="text" id="slot3" placeholder="例: 3"
+              class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-sm font-bold focus:border-indigo-500 focus:outline-none">
           </div>
         </div>
 
         <div class="flex gap-2">
-          <button onclick="searchSequence()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg shadow transition text-sm">
+          <button onclick="searchSequence()"
+            class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg shadow transition text-sm">
             検索実行
           </button>
-          <button onclick="clearSearch()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 rounded-lg text-sm transition">
+          <button onclick="clearSearch()"
+            class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 rounded-lg text-sm transition">
             クリア
           </button>
         </div>
@@ -59,24 +68,28 @@
 
     <!-- 2. データ管理モード画面 (初期状態は非表示) -->
     <section id="manageSection" class="hidden space-y-6">
-      
+
       <!-- シリンダー配列の登録・編集フォーム -->
       <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow space-y-3">
         <h2 id="formTitle" class="text-sm font-bold text-indigo-400">➕ シリンダー配列（番号）の追加</h2>
         <input type="hidden" id="editTargetId" value="">
         <div>
           <label class="block text-xs text-slate-400 mb-1">シリンダー名</label>
-          <input type="text" id="newGroupTitle" placeholder="例: Aシリンダー" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
+          <input type="text" id="newGroupTitle" placeholder="例: Aシリンダー"
+            class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
         </div>
         <div>
           <label class="block text-xs text-slate-400 mb-1">カード番号の配列 (カンマ区切り)</label>
-          <textarea id="newGroupCards" rows="3" placeholder="例: 1, 2, 3, 4, 5, 6, 7" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm font-mono focus:outline-none"></textarea>
+          <textarea id="newGroupCards" rows="3" placeholder="例: 1, 2, 3, 4, 5, 6, 7"
+            class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm font-mono focus:outline-none"></textarea>
         </div>
         <div class="flex gap-2">
-          <button id="saveButton" onclick="savePattern()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-sm transition">
+          <button id="saveButton" onclick="savePattern()"
+            class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-sm transition">
             配列を追加保存
           </button>
-          <button id="cancelButton" onclick="resetForm()" class="hidden bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 rounded-lg text-sm transition">
+          <button id="cancelButton" onclick="resetForm()"
+            class="hidden bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 rounded-lg text-sm transition">
             キャンセル
           </button>
         </div>
@@ -87,10 +100,13 @@
         <h2 class="text-sm font-bold text-amber-400">📖 カード名・レアリティ辞書</h2>
         <p class="text-[11px] text-slate-400">番号に対する名前を後からいつでも紐づけられます。</p>
         <div class="flex gap-2">
-          <input type="text" id="dictNo" placeholder="番号(例: 1)" class="w-1/3 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm text-center focus:outline-none">
-          <input type="text" id="dictName" placeholder="名前(例: N01, R02)" class="w-2/3 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
+          <input type="text" id="dictNo" placeholder="番号(例: 1)"
+            class="w-1/3 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm text-center focus:outline-none">
+          <input type="text" id="dictName" placeholder="名前(例: N01, R02)"
+            class="w-2/3 bg-slate-900 border border-slate-600 rounded-lg p-2 text-sm focus:outline-none">
         </div>
-        <button onclick="saveDictionaryItem()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg text-sm transition">
+        <button onclick="saveDictionaryItem()"
+          class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg text-sm transition">
           辞書に登録・更新
         </button>
         <div id="dictList" class="space-y-1 max-h-40 overflow-y-auto text-xs pt-2"></div>
@@ -114,14 +130,14 @@
     function exportToJson() {
       const patterns = getStoredPatterns();
       const dict = getStoredDict();
-  
+
       const exportData = {
         patterns: patterns,
         dict: dict
       };
-  
+
       const jsonStr = JSON.stringify(exportData, null, 2);
-  
+
       // クリップボードにコピー
       navigator.clipboard.writeText(jsonStr).then(() => {
         alert("スマホ内のデータをコピーしました！\nLINEやメール、メモ帳などに貼り付けてPCに送信してください。");
@@ -170,28 +186,25 @@
     function getCardDisplay(no) {
       const dict = getStoredDict();
       const name = dict[no] || "";
-      
-      let badgeColor = "bg-slate-800 text-slate-300 border-slate-700";
-      const upperName = name.toUpperCase();
 
-      if (upperName.startsWith("PL")) {
-        badgeColor = "bg-amber-950/80 text-amber-300 border-amber-600 font-bold";
-      } else if (upperName.startsWith("ER")) {
-        badgeColor = "bg-rose-950/80 text-blue-300 border-blue-600 font-bold";
-      } else if (upperName.startsWith("PR")) {
-        badgeColor = "bg-blue-950/80 text-yellow-300 border-yellow-600";
-      } else if (upperName.startsWith("R")) {
-        badgeColor = "bg-blue-950/80 text-gray-300 border-gray-600";
-      } else if (upperName.startsWith("N")) {
-        badgeColor = "bg-blue-950/80 text-gray-300 border-gray-600";
+      let badgeColor = "bg-slate-800 text-slate-300 border-slate-700";
+      // 番号(no) の頭文字を判定に使用します（大文字に揃えて判定）
+      const upperNo = no.toUpperCase();
+
+      if (upperNo.startsWith("UR") || upperNo.startsWith("SEC")) {
+        badgeColor = "bg-amber-950/80 text-amber-300 border-amber-600 font-bold"; // 金色系
+      } else if (upperNo.startsWith("SR")) {
+        badgeColor = "bg-rose-950/80 text-rose-300 border-rose-600 font-bold"; // 赤色系
+      } else if (upperNo.startsWith("R")) {
+        badgeColor = "bg-blue-950/80 text-blue-300 border-blue-600"; // 青色系
       }
-      
+
       return `
-        <div class="px-2 py-1 rounded border ${badgeColor} text-center min-w-[55px]">
-          <span class="text-[9px] block opacity-75 font-mono">No.${no}</span>
-          <span class="text-xs">${name || no}</span>
-        </div>
-      `;
+    <div class="px-2 py-1 rounded border ${badgeColor} text-center min-w-[55px]">
+      <span class="text-[9px] block opacity-75 font-mono">No.${no}</span>
+      <span class="text-xs">${name || no}</span>
+    </div>
+  `;
     }
 
     function searchSequence() {
@@ -240,7 +253,7 @@
 
       matches.forEach(m => {
         const matchedNames = m.matchedSeq.map(n => getCardDisplay(n)).join(' <span class="text-slate-500">→</span> ');
-        
+
         let nextHtml = '<span class="text-slate-500 text-xs">（これ以降のデータなし）</span>';
         if (m.nextNums.length > 0) {
           nextHtml = `
@@ -323,7 +336,7 @@
       document.getElementById('editTargetId').value = target.id;
       document.getElementById('newGroupTitle').value = target.title;
       document.getElementById('newGroupCards').value = target.numbers.join(", ");
-      
+
       document.getElementById('formTitle').innerText = "✏️ シリンダー配列の編集";
       document.getElementById('saveButton').innerText = "変更を保存する";
       document.getElementById('saveButton').className = "flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg text-sm transition";
@@ -400,7 +413,7 @@
       const dict = getStoredDict();
       dictEl.innerHTML = "";
       const keys = Object.keys(dict).sort((a, b) => Number(a) - Number(b));
-      
+
       if (keys.length === 0) {
         dictEl.innerHTML = `<div class="text-slate-500 text-center">辞書データはまだありません</div>`;
       } else {
@@ -425,4 +438,5 @@
     }
   </script>
 </body>
+
 </html>
