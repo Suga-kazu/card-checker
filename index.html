@@ -68,6 +68,14 @@
 
     <!-- 2. データ管理モード画面 (初期状態は非表示) -->
     <section id="manageSection" class="hidden space-y-6">
+      <!-- ★ここから貼り付け★ -->
+      <div class="bg-indigo-950 p-3 rounded-xl border border-indigo-700 space-y-2">
+        <span class="text-xs font-bold text-indigo-300 block">📦 現在のデータをJSONとして取り出す</span>
+        <button onclick="exportToJson()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 rounded text-xs">
+          スマホ内のデータをコピーする
+        </button>
+      </div>
+      <!-- ★ここまで貼り付け★ -->
 
       <!-- データ書き出しエリア -->
       <div class="bg-indigo-950 p-3 rounded-xl border border-indigo-700 space-y-2">
