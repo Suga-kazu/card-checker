@@ -195,14 +195,14 @@
       let badgeColor = "bg-slate-800 text-slate-300 border-slate-700";
       const upperNo = no.toUpperCase();
 
-      if (upperNo.startsWith("UR") || upperNo.startsWith("SEC")) {
-        badgeColor = "bg-amber-950/80 text-amber-300 border-amber-600 font-bold"; // 金色系
-      } else if (upperNo.startsWith("SR")) {
-        badgeColor = "bg-rose-950/80 text-rose-300 border-rose-600 font-bold"; // 赤色系
+      if (upperNo.startsWith("PL")) {
+        badgeColor = "bg-pink-950/80 text-pink-300 border-pink-600 font-bold"; // ピンク系
+      } else if (upperNo.startsWith("ER")) {
+        badgeColor = "bg-blue-950/80 text-blue-300 border-blue-600 font-bold"; // 青色系
+      } else if (upperNo.startsWith("PR")) {
+        badgeColor = "bg-yellow-950/80 text-yellow-300 border-yellow-600 font-bold"; // 黄色系
       } else if (upperNo.startsWith("R")) {
-        badgeColor = "bg-blue-950/80 text-blue-300 border-blue-600"; // 青色系
-      } else if (upperNo.startsWith("PL")) {
-        badgeColor = "bg-pink-950/80 text-pink-300 border-pink-600 font-bold";
+        badgeColor = "bg-green-950/80 text-green-300 border-green-600"; // 緑色系
       }
 
       return `
